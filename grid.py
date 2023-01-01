@@ -45,4 +45,4 @@ ax.gridlines() #Add gridlines
 
 plt.savefig(f'images/lightningData{0}.png', transparent=False, dpi=1000) #Save figure
 print("E")
-
+ 
