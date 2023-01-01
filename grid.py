@@ -30,8 +30,11 @@ dataframe = dataframe.reset_index()
 print(dataframe['Date'])
 
 gridrad = xr.open_dataset('gridrad_grid.nc')
-print(gridrad)
+print(f'{gridrad}\nEEE\n')
 ax,cbar,C = util.boxbin(dataframe['Lon'], dataframe["Lat"], gridrad["Longitude"], gridrad["Latitude"])
+print(ax)
+print(cbar)
+print(C)
 central_lon = np.mean(extent[:2]) # Get central longitude
 central_lat = np.mean(extent[2:]) # Get central latitude
 # ax = plt.axes(projection=ccrs.crs.AlbersEqualArea(central_lon, central_lat)) #Create map
@@ -44,5 +47,4 @@ central_lat = np.mean(extent[2:]) # Get central latitude
 # ax.gridlines() #Add gridlines
 
 plt.savefig(f'images/lightningData{0}.png', transparent=False, dpi=1000) #Save figure
-print("E")
  
