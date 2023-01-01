@@ -1,0 +1,2 @@
+/var/slurm/spool/slurmd/job13458160/slurm_script: line 20: activate: No such file or directory
+slurmstepd: error: acct_gather_profile/influxdb _send_data: curl_easy_perform failed to send data (discarded). Reason: Couldn't resolve host name
