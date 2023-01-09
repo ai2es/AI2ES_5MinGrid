@@ -17,7 +17,7 @@ print("Reading in files...")
 dataframe = pd.DataFrame()
 
 for filename in filenames:
-    dataframe = pd.concat([dataframe, pd.read_csv(filename, header = None, delim_whitespace=True, names=columns)], axis=0)
+    dataframe = pd.concat([dataframe, pd.read_csv(f"//ourdisk/hpc/ai2es/hail/nldn/raw/{filename}", header = None, delim_whitespace=True, names=columns)], axis=0)
 
 print("Done reading files...")
 
