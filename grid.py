@@ -1,4 +1,5 @@
 import numpy as np
+import pandas
 import pandas as pd
 import xarray as xr
 import datetime as dt
@@ -8,35 +9,62 @@ import util
 
 extent = [-106, -89, 42.0, 30] #Lat and Long extent of map
 
-#filenames = ["TestData.txt", "TestData2.txt"]
-filenames = ["McGovern1.asc", "McGovern2.asc", "McGovern3.asc", "McGovern4.asc", "McGovern5.asc"]
+# //ourdisk/hpc/ai2es/hail/nldn/raw/
+filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"]
+#filenames = ["McGovern1.asc", "McGovern2.asc", "McGovern3.asc", "McGovern4.asc", "McGovern5.asc"]
 columns = ["Date", "Time", "Lat", "Lon", "Magnitude", "Type"]
 
 print("Reading in files...")
 
-dataframe = pd.DataFrame()
+dataframe = []
 
 for filename in filenames:
-    dataframe = pd.concat([dataframe, pd.read_csv(f"//ourdisk/hpc/ai2es/hail/nldn/raw/{filename}", header = None, delim_whitespace=True, names=columns)], axis=0)
+    temp = pandas.read_csv(filename,header=None,delim_whitespace=True, names=columns)
+    dataframe.append(temp)
+
+df = pd.concat(dataframe, axis=0, ignore_index=True)
+
+# lon = df[3]
+# lat = df[2]
 
 print("Done reading files...")
 
-dataframe['Date'] = dataframe['Date'].str.cat(dataframe['Time'], sep=' ')
+print(df)
+df['datetime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])
+print(df)
+df.drop('Date', inplace=True, axis=1)
+df.drop('Time', inplace=True, axis=1)
+startTime = df['datetime'][0].
+endTime = startTime + dt.timedelta(0,300)
+#lastTime = df['datetime'][len(df['datetime']-1)]
+df = df.set_index('datetime')
+df.sort_values(by='datetime', inplace=True)
 
-dataframe['Date'] = pd.to_datetime(dataframe['Date'], format='%Y-%m-%d %H:%M:%S.%f')
-dataframe = dataframe.drop(['Time'], axis=1)
 
-dataframe.sort_values(by=['Date'], inplace=True)
-dataframe = dataframe.reset_index()
+xedge = np.arange(-106,-88,0.02083333)
+yedge = np.arange(30,42,0.02083333)
 
-print(dataframe['Date'])
+print(startTime)
+#startTime = startTime.replace(hour=0, minute=0, second=0, microsecond=0)
+#print(lastTime)
+print(endTime)
 
-gridrad = xr.open_dataset('gridrad_grid.nc')
-print(f'Gridrad: {gridrad}')
-ax, cbar, C = util.boxbin(dataframe['Lon'], dataframe["Lat"], gridrad["Longitude"], gridrad["Latitude"])
-print(f"ax: {ax}")
-print(f'cbar: {cbar}')
-print(f'C: {C}')
+while(endTime <= lastTime):
+    temp = df[slice(startTime.to_string(), endTime.to_string())]
+    ax, cbar, C = util.boxbin(temp['Lon'], temp['Lat'], xedge, yedge, mincnt=0)
+    if len(C) > 0:
+        plt.savefig(f'images/lightningData{startTime}{endTime}.png', transparent=False, dpi=1000)  # Save figure
+        #C.to_netcdf(f'images/lightningData{startTime}{endTime}.png')
+    else:
+        continue
 
-plt.savefig(f'images/lightningData{0}.png', transparent=False, dpi=1000) #Save figure
- 
+    startTime = endTime
+    endTime = endTime + dt.timedelta(0,300)
+
+print("Done")
+
+#set index to datetime, slice on that
+#save netcdf, one for each 5 min lat, lon grid and time in file
+#C matrix may be transposed
+#
+#
