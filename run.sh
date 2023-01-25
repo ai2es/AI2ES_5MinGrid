@@ -3,9 +3,9 @@
 #SBATCH --job-name=lightning
 #SBATCH --ntasks=1
 #SBATCH --mail-type=ALL
-#SBATCH -p debug
+#SBATCH -p normal
 #SBATCH --mem=28G
-#SBATCH -t 00:20:00
+#SBATCH -t 12:00:00
 #SBATCH --mail-user=wrmf@ou.edu
 #SBATCH --output=logs/lightning_%A_stdout.txt
 #SBATCH --error=logs/lightning_%A_sderr.txt
