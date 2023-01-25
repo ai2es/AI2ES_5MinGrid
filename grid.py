@@ -47,7 +47,7 @@ for filename in filenames:
             plt.savefig(f'output/{runStart}/lightningData{startTime}{endTime}.png', transparent=False,
                         dpi=1000)  # Save figure
             print(f'Saved lightningData{startTime}{endTime}.png')
-            # C.to_netcdf(f'images/lightningData{startTime}{endTime}.png')
+            # C.to_netcdf(f'output/{runStart}/lightningData{startTime}{endTime}.nc')
         else:
             pass
 
