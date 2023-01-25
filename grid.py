@@ -10,6 +10,9 @@ import datetime as dt
 import cartopy as ccrs
 import matplotlib.pyplot as plt
 import util
+import imageio.v2 as imageio
+import os
+import glob
 
 extent = [-106, -89, 42.0, 30] #Lat and Long extent of map
 
@@ -57,8 +60,14 @@ for filename in filenames:
 
     print("Done")
 
+images = []
 
-print("Done reading files...")
+path = f'output/{runStart}'
+for filename in sorted(glob.glob(os.path.join(path, 'Page*.png'))):
+    images.append(imageio.imread(filename))
+    print(f"Added {filename}")
+
+imageio.mimsave(f'output/{runStart}/{runStart}.gif', images, duration=1)
 
 
 
