@@ -23,8 +23,6 @@ columns = ["Date", "Time", "Lat", "Lon", "Magnitude", "Type"]
 
 print("Reading in files...")
 
-dataframe = []
-
 runStart = time.time()
 os.makedirs(f'output/{runStart}')
 
@@ -58,7 +56,7 @@ for filename in filenames:
         endTime = endTime + dt.timedelta(0, 300)
         plt.close('all')
 
-    print("Done")
+print('Finished creating images, now creating gif')
 
 images = []
 
@@ -68,6 +66,8 @@ for filename in sorted(glob.glob(os.path.join(path, 'Page*.png'))):
     print(f"Added {filename}")
 
 imageio.mimsave(f'output/{runStart}/{runStart}.gif', images, duration=1)
+
+print('Done with all')
 
 
 
