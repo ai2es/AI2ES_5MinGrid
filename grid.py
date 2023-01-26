@@ -16,7 +16,7 @@ extent = [-106, -89, 42.0, 30] #Lat and Long extent of map
 
 # //ourdisk/hpc/ai2es/hail/nldn/raw/
 #filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"]
-filenames = ["McGovern1.asc"]
+filenames = ["McGovern2.asc"]
 columns = ["Date", "Time", "Lat", "Lon", "Magnitude", "Type"]
 
 print("Reading in files...")
