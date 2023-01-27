@@ -5,7 +5,7 @@ import sys
 
 images = []
 
-path = sys.argv[1]
+path = 'output/1674676482.15455'
 print(path)
 for filename in sorted(glob.glob(os.path.join(path, '*.png'))):
     images.append(imageio.imread(filename))
