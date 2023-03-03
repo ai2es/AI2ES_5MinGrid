@@ -6,7 +6,6 @@ import sys
 images = []
 
 path = 'output/1674676482.15455'
-print(path)
 for filename in sorted(glob.glob(os.path.join(path, '*.png'))):
     images.append(imageio.imread(filename))
     print(f"Added {filename}")
