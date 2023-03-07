@@ -68,7 +68,7 @@ for filename in filenames:
             tempArray = xr.Dataset(data_vars=dict(strikes=(["x", "y"], C)),
                                  coords=dict(lon=(["x"], xmid), lat=(["x"], ymid)),attrs=dict(description="Lightning data"),)
             tempArray.to_netcdf(path=f'output/{runStart}/lightningData{startTime}.nc')
-            print("Saved netcdf")
+            print(f"Saved netcdf {runStart}")
 
         else:
             pass
