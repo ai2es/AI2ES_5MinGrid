@@ -68,6 +68,7 @@ for filename in filenames:
             tempArray = xr.Dataset(data_vars=dict(strikes=(["x", "y"], C)),
                                  coords=dict(lon=(["x"], xmid), lat=(["x"], ymid)),attrs=dict(description="Lightning data"),)
             tempArray.to_netcdf(path=f'output/{runStart}/lightningData{startTime}.nc')
+            print("Saved netcdf")
 
         else:
             pass
@@ -78,14 +79,14 @@ for filename in filenames:
 
 print('Finished creating images, now creating gif')
 
-images = []
-
-path = f'output/{runStart}'
-for filename in sorted(glob.glob(os.path.join(path, '*.png'))):
-    images.append(imageio.imread(filename))
-    print(f"Added {filename}")
-
-imageio.mimsave(f'output/{runStart}/{runStart}.gif', images, duration=1)
+# images = []
+#
+# path = f'output/{runStart}'
+# for filename in sorted(glob.glob(os.path.join(path, '*.png'))):
+#     images.append(imageio.imread(filename))
+#     print(f"Added {filename}")
+#
+# imageio.mimsave(f'output/{runStart}/{runStart}.gif', images, duration=1)
 
 print('Done with all')
 
