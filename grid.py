@@ -58,19 +58,18 @@ for filename in filenames: #Do individually for each file
     while (startTime <= lastTime): #Loop through entire file
         currentTime = startTime #Get current time within dataframe
         while currentTime <= endTime: #Loop through each day
-            print(f"{currentTime} {endTime}")
             temp = df[slice(currentTime, currentTime+dt.timedelta(0, 300))] #Slice on 5 minutes
             ax, cbar, C = util.boxbin(temp['Lon'], temp['Lat'], xedge, yedge, mincnt=0) #Create mesh (Randy's code)
             if len(temp) > 0: #Only create dataset if there is data
                 if currentTime == startTime: #If this is the first chunk of the day
                     tempArray = xr.Dataset(data_vars=dict(strikes=(["x", "y"], C)),
                                            coords=dict(lon=(["x"], xmid), lat=(["y"], ymid),
-                                                       time=(['time'], np.arange(startTime, endTime, 300000000))),
+                                                       time=(['time'], np.arange(np.datetime64(startTime), np.datetime64(endTime), 300000000))),
                                            attrs=dict(description="Lightning data"), ) #Create dataset
                 else:
                     tempArray2 = xr.Dataset(data_vars=dict(strikes=(["x", "y"], C)),
                                             coords=dict(lon=(["x"], xmid), lat=(["y"], ymid),
-                                                        time=(['time'], np.arange(startTime, endTime, 300000000))),
+                                                        time=(['time'], np.arange(np.datetime64(startTime), np.datetime64(endTime), 300000000))),
                                             attrs=dict(description="Lightning data"), ) #Create dataset
                     tempArray = xr.concat([tempArray, tempArray2], data_vars='all', dim='time') #Append together
             else:
@@ -78,6 +77,7 @@ for filename in filenames: #Do individually for each file
 
             currentTime = currentTime+dt.timedelta(0, 300) #Increase current time by 5 minutes
 
+        print(tempArray)
         tempArray.to_netcdf(path=f'output/{runStart}/lightningData{str(startTime).split(" ")[0]}.nc') #Save
         print(f"Saved netcdf lightningData{str(startTime).split(' ')[0]}.nc") #Print save message
         startTime = endTime #Reset start time
