@@ -88,7 +88,7 @@ for filename in filenames: #Do individually for each file
                         attrs=dict(description="Lightning data"),
                     )  # Create dataset
 
-                    tempArray = tempArray.merge(tempArray2)
+                    tempArray = tempArray.merge(tempArray2, compat='override')
             else:
                 pass
 
