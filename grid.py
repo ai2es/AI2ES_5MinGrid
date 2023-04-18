@@ -62,16 +62,33 @@ for filename in filenames: #Do individually for each file
             ax, cbar, C = util.boxbin(temp['Lon'], temp['Lat'], xedge, yedge, mincnt=0) #Create mesh (Randy's code)
             if len(temp) > 0: #Only create dataset if there is data
                 if currentTime == startTime: #If this is the first chunk of the day
-                    tempArray = xr.Dataset(data_vars=dict(strikes=(["x", "y"], C)),
-                                           coords=dict(lon=(["x"], xmid), lat=(["y"], ymid),
-                                                       time=(['time'], np.arange(np.datetime64(startTime), np.datetime64(endTime), 300000000))),
-                                           attrs=dict(description="Lightning data"), ) #Create dataset
+                    tempArray = xr.Dataset(
+                        data_vars=dict(strikes=(["x", "y"], C)),
+                        coords=dict(
+                            lon=(["x"], xmid),
+                            lat=(["y"], ymid),
+                            time=(['time'], np.arange(
+                                np.datetime64(startTime.replace(hour=0, minute=0, second=0, microsecond=0)),
+                                np.datetime64(endTime), 300000000
+                            )),
+                        ),
+                        attrs=dict(description="Lightning data"),
+                    )  # Create dataset
                 else:
-                    tempArray2 = xr.Dataset(data_vars=dict(strikes=(["x", "y"], C)),
-                                            coords=dict(lon=(["x"], xmid), lat=(["y"], ymid),
-                                                        time=(['time'], np.arange(np.datetime64(startTime), np.datetime64(endTime), 300000000))),
-                                            attrs=dict(description="Lightning data"), ) #Create dataset
-                    tempArray = xr.concat([tempArray, tempArray2], data_vars='all', dim='time') #Append together
+                    tempArray2 = xr.Dataset(
+                        data_vars=dict(strikes=(["x", "y"], C)),
+                        coords=dict(
+                            lon=(["x"], xmid),
+                            lat=(["y"], ymid),
+                            time=(['time'], np.arange(
+                                np.datetime64(startTime.replace(hour=0, minute=0, second=0, microsecond=0)),
+                                np.datetime64(endTime), 300000000
+                            )),
+                        ),
+                        attrs=dict(description="Lightning data"),
+                    )  # Create dataset
+
+                    tempArray = tempArray.merge(tempArray2)
             else:
                 pass
 
