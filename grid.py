@@ -59,7 +59,7 @@ for filename in filenames: #Do individually for each file
         currentTime = startTime #Get current time within dataframe
         while currentTime <= endTime: #Loop through each day
             temp = df[slice(currentTime, currentTime+dt.timedelta(0, 300))] #Slice on 5 minutes
-            ax, cbar, C = util.boxbin(temp['Lon'], temp['Lat'], xedge, yedge, mincnt=0) #Create mesh (Randy's code)
+            C = util.boxbin(temp['Lon'], temp['Lat'], xedge, yedge, mincnt=0) #Create mesh (Randy's code)
             if len(temp) > 0: #Only create dataset if there is data
                 if currentTime == startTime: #If this is the first chunk of the day
                     tempArray = xr.Dataset(

@@ -93,29 +93,29 @@ def boxbin(x, y, xedge, yedge, c=None, figsize=(5, 5), cmap='viridis', mincnt=10
             C = C * 100
             print('n_samples= {}'.format(n_samples))
 
-        if ax is None:
-            fig = plt.figure(figsize=(5, 5))
-            ax = plt.gca()
-        else:
-            pass
+        # if ax is None:
+        #     fig = plt.figure(figsize=(5, 5))
+        #     ax = plt.gca()
+        # else:
+        #     pass
+        #
+        # if powernorm:
+        #     pm = ax.pcolormesh(xedge, yedge, C.transpose(), cmap=cmap, edgecolor=edgecolor,
+        #                        norm=colors.PowerNorm(gamma=0.5), vmin=vmin, vmax=vmax, alpha=alpha)
+        #
+        #     if cbar:
+        #         cbar = plt.colorbar(pm, ax=ax)
+        #     else:
+        #         cbar = pm
+        # else:
+        #     pm = ax.pcolormesh(xedge, yedge, C.transpose(), cmap=cmap, vmin=vmin, vmax=vmax, edgecolor=edgecolor,
+        #                        alpha=alpha)
+        #     if cbar:
+        #         cbar = plt.colorbar(pm, ax=ax)
+        #     else:
+        #         cbar = pm
 
-        if powernorm:
-            pm = ax.pcolormesh(xedge, yedge, C.transpose(), cmap=cmap, edgecolor=edgecolor,
-                               norm=colors.PowerNorm(gamma=0.5), vmin=vmin, vmax=vmax, alpha=alpha)
-
-            if cbar:
-                cbar = plt.colorbar(pm, ax=ax)
-            else:
-                cbar = pm
-        else:
-            pm = ax.pcolormesh(xedge, yedge, C.transpose(), cmap=cmap, vmin=vmin, vmax=vmax, edgecolor=edgecolor,
-                               alpha=alpha)
-            if cbar:
-                cbar = plt.colorbar(pm, ax=ax)
-            else:
-                cbar = pm
-
-        return ax, cbar, C
+        return C # ax, cbar, C
 
     elif unconditional:
 
