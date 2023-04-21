@@ -16,8 +16,8 @@ import netCDF4 as nc
 extent = [-106, -89, 42.0, 30] #Lat and Long extent of map
 
 # //ourdisk/hpc/ai2es/hail/nldn/raw/
-filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"] #Dest datasets
-#filenames = ["McGovern1.asc"]
+#filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"] #Dest datasets
+filenames = ["McGovern1.asc"]
 columns = ["Date", "Time", "Lat", "Lon", "Magnitude", "Type"] #Input dataframe columns
 
 print("Reading in files...")
@@ -43,12 +43,12 @@ while(i < len(yedge)-1):
 
 
 for filename in filenames: #Do individually for each file
-    df = pandas.read_csv(f'{filename}',header=None,delim_whitespace=True, names=columns) #Read in dataframe
+    df = pandas.read_csv(f'//ourdisk/hpc/ai2es/hail/nldn/raw/{filename}',header=None,delim_whitespace=True, names=columns) #Read in dataframe
 
     df['datetime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])  #Create datetime column
     df.drop('Date', inplace=True, axis=1) #Drop date axis
     df.drop('Time', inplace=True, axis=1) #Drop time axis
-    startTime = df['datetime'][0].replace(second=0, microsecond=0) #Get start time of file
+    startTime = df['datetime'][0].replace(hour=0, minute=0, second=0, microsecond=0) #Get start time of file
     endTime = startTime.replace(hour=0, minute=0, second=0, microsecond=0) + dt.timedelta(0, 86400) #Get end of first day
     lastTime = df['datetime'][len(df) - 1].replace(second=0, microsecond=0) #Get last time in file
     df = df.set_index('datetime') #Set index to datetime in dataframe
