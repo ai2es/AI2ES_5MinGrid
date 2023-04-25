@@ -16,8 +16,8 @@ import netCDF4 as nc
 extent = [-106, -89, 42.0, 30] #Lat and Long extent of map
 
 # //ourdisk/hpc/ai2es/hail/nldn/raw/
-filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"] #Dest datasets
-#filenames = ["McGovern1.asc"]
+#filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"] #Dest datasets
+filenames = ["McGovern1.asc", "McGovern2.asc", "McGovern3.asc", "McGovern4.asc", "McGovern5.asc"]
 columns = ["Date", "Time", "Lat", "Lon", "Magnitude", "Type"] #Input dataframe columns
 
 print("Reading in files...")
@@ -43,7 +43,7 @@ while(i < len(yedge)-1):
 
 
 for filename in filenames: #Do individually for each file
-    df = pandas.read_csv(f'{filename}',header=None,delim_whitespace=True, names=columns) #Read in dataframe
+    df = pandas.read_csv(f'//ourdisk/hpc/ai2es/hail/nldn/raw/{filename}',header=None,delim_whitespace=True, names=columns) #Read in dataframe
 
     df['datetime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])  #Create datetime column
     df.drop('Date', inplace=True, axis=1) #Drop date axis
