@@ -16,8 +16,8 @@ import netCDF4 as nc
 extent = [-106, -89, 42.0, 30] #Lat and Long extent of map
 
 # //ourdisk/hpc/ai2es/hail/nldn/raw/
-#filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"] #Dest datasets
-filenames = ["McGovern1.asc"]
+filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"] #Dest datasets
+#filenames = ["McGovern1.asc"]
 columns = ["Date", "Time", "Lat", "Lon", "Magnitude", "Type"] #Input dataframe columns
 
 print("Reading in files...")
@@ -43,58 +43,45 @@ while(i < len(yedge)-1):
 
 
 for filename in filenames: #Do individually for each file
-    df = pandas.read_csv(f'//ourdisk/hpc/ai2es/hail/nldn/raw/{filename}',header=None,delim_whitespace=True, names=columns) #Read in dataframe
+    df = pandas.read_csv(f'{filename}',header=None,delim_whitespace=True, names=columns) #Read in dataframe
 
     df['datetime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])  #Create datetime column
     df.drop('Date', inplace=True, axis=1) #Drop date axis
     df.drop('Time', inplace=True, axis=1) #Drop time axis
+    df.sort_values(by='datetime', inplace=True)  # Sort by time
     startTime = df['datetime'][0].replace(hour=0, minute=0, second=0, microsecond=0) #Get start time of file
     endTime = startTime.replace(hour=0, minute=0, second=0, microsecond=0) + dt.timedelta(0, 86400) #Get end of first day
     lastTime = df['datetime'][len(df) - 1].replace(second=0, microsecond=0) #Get last time in file
     df = df.set_index('datetime') #Set index to datetime in dataframe
-    df.sort_values(by='datetime', inplace=True) #Sort by time
 
     tempArray = xr.Dataset()  # Create temp xarray
     while (startTime <= lastTime): #Loop through entire file
         currentTime = startTime #Get current time within dataframe
-        while currentTime <= endTime: #Loop through each day
+        tempArrayList = []
+        tempArrayTimeList = []
+        while currentTime < endTime: #Loop through each day
             temp = df[slice(currentTime, currentTime+dt.timedelta(0, 300))] #Slice on 5 minutes
             C = util.boxbin(temp['Lon'], temp['Lat'], xedge, yedge, mincnt=0) #Create mesh (Randy's code)
-            if len(temp) > 0: #Only create dataset if there is data
-                if currentTime == startTime: #If this is the first chunk of the day
-                    tempArray = xr.Dataset(
-                        data_vars=dict(strikes=(["x", "y"], C)),
-                        coords=dict(
-                            lon=(["x"], xmid),
-                            lat=(["y"], ymid),
-                            time=(['time'], np.arange(
-                                np.datetime64(startTime.replace(hour=0, minute=0, second=0, microsecond=0)),
-                                np.datetime64(endTime), 300000000
-                            )),
-                        ),
-                        attrs=dict(description="Lightning data"),
-                    )  # Create dataset
-                else:
-                    tempArray2 = xr.Dataset(
-                        data_vars=dict(strikes=(["x", "y"], C)),
-                        coords=dict(
-                            lon=(["x"], xmid),
-                            lat=(["y"], ymid),
-                            time=(['time'], np.arange(
-                                np.datetime64(startTime.replace(hour=0, minute=0, second=0, microsecond=0)),
-                                np.datetime64(endTime), 300000000
-                            )),
-                        ),
-                        attrs=dict(description="Lightning data"),
-                    )  # Create dataset
+            tempArray = xr.Dataset(
+                data_vars=dict(strikes=(["x", "y"], C)),
+                coords=dict(
+                    lon=(["x"], xmid),
+                    lat=(["y"], ymid),
+                ),
+                attrs=dict(description="Lightning data"),
+            )  # Create dataset
 
-                    tempArray = tempArray.merge(tempArray2, compat='override')
-            else:
-                pass
-
+            tempArrayList.append(tempArray)
+            tempArrayTimeList.append(currentTime)
             currentTime = currentTime+dt.timedelta(0, 300) #Increase current time by 5 minutes
 
-        print(tempArray)
+        tempArray = xr.concat(tempArrayList, data_vars='all', dim='time')
+
+
+
+        tempArray = tempArray.assign_coords(time=tempArrayTimeList)
+        tempArray = tempArray.fillna(0)
+
         tempArray.to_netcdf(path=f'output/{runStart}/lightningData{str(startTime).split(" ")[0]}.nc') #Save
         print(f"Saved netcdf lightningData{str(startTime).split(' ')[0]}.nc") #Print save message
         startTime = endTime #Reset start time
