@@ -1,36 +1,40 @@
 import os
-import time
 import numpy as np
 import pandas
 import pandas as pd
 import xarray as xr
 import datetime as dt
-import cartopy as ccrs
-import matplotlib.pyplot as plt
 import util
-#import imageio.v2 as imageio
 import os
 import glob
-import netCDF4 as nc
+import argparse
 
-extent = [-106, -89, 42.0, 30] #Lat and Long extent of map
+def create_parser():
+    '''
+    Create argument parser
+    '''
+    # Parse the command-line arguments
+    parser = argparse.ArgumentParser(description='', fromfile_prefix_chars='@')
 
-# //ourdisk/hpc/ai2es/hail/nldn/raw/
-#filenames = ["TestData.txt", "TestData2.txt", "TestData3.csv"] #Dest datasets
-filenames = ["McGovern1.asc", "McGovern2.asc", "McGovern3.asc", "McGovern4.asc", "McGovern5.asc"]
+    parser.add_argument('--input_acs_files_glob', type=str, default="/ourdisk/hpc/ai2es/hail/nldn/raw_temp/*")
+    parser.add_argument('--output_dir', type=str, default="/ourdisk/hpc/ai2es/hail/nldn/gridded")
+
+    return parser
+
+# extent = [-106, -89, 42.0, 30] #Lat and Long extent of map
 columns = ["Date", "Time", "Lat", "Lon", "Magnitude", "Type"] #Input dataframe columns
 
-print("Reading in files...")
+parser = create_parser()
+args = parser.parse_args()
+args = vars(args)
 
-runStart = time.time() #Get run start time
-os.makedirs(f'output/{runStart}') #Create output directory
+filenames = glob.glob(args["input_acs_files_glob"])
+output_dir = args["output_dir"]
 
 xedge = np.arange(-106, -88, 0.02083333) #Get edges with gridrad
 yedge = np.arange(30, 42, 0.02083333) #Get edges with gridrad
 xmid = [] #Blank array
 ymid = [] #Blank array
-
-
 
 i=0
 while(i < len(xedge)-1):
@@ -43,7 +47,7 @@ while(i < len(yedge)-1):
 
 
 for filename in filenames: #Do individually for each file
-    df = pandas.read_csv(f'//ourdisk/hpc/ai2es/hail/nldn/raw/{filename}',header=None,delim_whitespace=True, names=columns) #Read in dataframe
+    df = pandas.read_csv(filename, header=None,delim_whitespace=True, names=columns) #Read in dataframe
 
     df['datetime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])  #Create datetime column
     df.drop('Date', inplace=True, axis=1) #Drop date axis
@@ -54,16 +58,16 @@ for filename in filenames: #Do individually for each file
     lastTime = df['datetime'][len(df) - 1].replace(second=0, microsecond=0) #Get last time in file
     df = df.set_index('datetime') #Set index to datetime in dataframe
 
-    tempArray = xr.Dataset()  # Create temp xarray
     while (startTime <= lastTime): #Loop through entire file
         currentTime = startTime #Get current time within dataframe
-        tempArrayList = []
-        tempArrayTimeList = []
+        lightning_events_ds_list = []
+        times_list = []
+
         while currentTime < endTime: #Loop through each day
-            temp = df[slice(currentTime, currentTime+dt.timedelta(0, 300))] #Slice on 5 minutes
-            C = util.boxbin(temp['Lon'], temp['Lat'], xedge, yedge, mincnt=0) #Create mesh (Randy's code)
-            tempArray = xr.Dataset(
-                data_vars=dict(strikes=(["x", "y"], C)),
+            sliced_df = df[slice(currentTime, currentTime+dt.timedelta(0, 300))] #Slice on 5 minutes
+            lightning_events = util.boxbin(sliced_df['Lon'], sliced_df['Lat'], xedge, yedge, mincnt=0) #Create mesh (Randy's code)
+            lightning_events_ds = xr.Dataset(
+                data_vars=dict(strikes=(["x", "y"], lightning_events)),
                 coords=dict(
                     lon=(["x"], xmid),
                     lat=(["y"], ymid),
@@ -71,18 +75,17 @@ for filename in filenames: #Do individually for each file
                 attrs=dict(description="Lightning data"),
             )  # Create dataset
 
-            tempArrayList.append(tempArray)
-            tempArrayTimeList.append(currentTime)
+            lightning_events_ds_list.append(lightning_events_ds)
+            times_list.append(currentTime)
             currentTime = currentTime+dt.timedelta(0, 300) #Increase current time by 5 minutes
 
-        tempArray = xr.concat(tempArrayList, data_vars='all', dim='time')
+        single_day_ds = xr.concat(lightning_events_ds_list, data_vars='all', dim='time')
 
+        single_day_ds = single_day_ds.assign_coords(time=times_list)
+        single_day_ds = single_day_ds.fillna(0)
 
+        output_path = os.path.join(output_dir, str(startTime).split(" ")[0] + ".nc")
+        single_day_ds.to_netcdf(output_path) #Save
 
-        tempArray = tempArray.assign_coords(time=tempArrayTimeList)
-        tempArray = tempArray.fillna(0)
-
-        tempArray.to_netcdf(path=f'output/{runStart}/lightningData{str(startTime).split(" ")[0]}.nc') #Save
-        print(f"Saved netcdf lightningData{str(startTime).split(' ')[0]}.nc") #Print save message
         startTime = endTime #Reset start time
         endTime = endTime + dt.timedelta(0, 86400) #Increase end time by one day

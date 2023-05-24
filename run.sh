@@ -1,22 +1,22 @@
-#!/usr/bin/bash
+#!/bin/bash
 
-#SBATCH --job-name=lightning
-#SBATCH --ntasks=1
+#SBATCH --partition=ai2es
+# Thread count:
+#SBATCH --cpus-per-task=3
+# memory in MB
+#SBATCH --mem=81920
+# The %04a is translated into a 4-digit number that encodes the SLURM_ARRAY_TASK_ID
+#SBATCH --output=/ourdisk/hpc/ai2es/severe_nowcasting/hail_nowcasting/3d_unets-2d_unets-1_hour-1_inch-train_val_test-cross_val/slurm_output/out/grid_lightning_%04a_stdout.txt
+#SBATCH --error=/ourdisk/hpc/ai2es/severe_nowcasting/hail_nowcasting/3d_unets-2d_unets-1_hour-1_inch-train_val_test-cross_val/slurm_output/err/grid_lightning_%04a_stderr.txt
+#SBATCH --time=03:00:00
+#SBATCH --job-name=grid_lightning
+#SBATCH --mail-user=tobias.schmidt@ou.edu
 #SBATCH --mail-type=ALL
-#SBATCH -p normal
-#SBATCH --mem=28G
-#SBATCH -t 12:00:00
-#SBATCH --mail-user=wrmf@ou.edu
-#SBATCH --output=logs/lightning_%A_stdout.txt
-#SBATCH --error=logs/lightning_%A_sderr.txt
+#SBATCH --chdir=/home/tgschmidt/AI2ES_5MinGrid
+#SBATCH --array=0-0
+#
+#################################################
 
-# cd to directory where job was submitted from
-cd $SLURM_SUBMIT_DIR
-pwd
+/home/tgschmidt/sn_env/bin/python -u grid.py
 
-# echo the job id to the slurm file
-# echo $SLURM_ARRAY_TASK_ID
 
-source activate maps
-
-python -u grid.py
